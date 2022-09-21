@@ -1,0 +1,28 @@
+.container {
+  position: relative;
+  .list {
+    :global {
+      .adm-radio .adm-radio-icon {
+        box-sizing: content-box;
+      }
+      .adm-list-body {
+        height: calc(100vh - 499px);
+        overflow: auto;
+      }
+    }
+    .addIcon {
+      position: absolute;
+      right: 10px;
+      top: 4px;
+      font-size: 1.5em;
+    }
+    .editIcon {
+      font-size: 1.5em;
+      color: #1677ff;
+    }
+    .deleleIcon {
+      font-size: 1.5em;
+      color: red;
+    }
+  }
+}
