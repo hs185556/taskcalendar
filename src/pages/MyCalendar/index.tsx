@@ -20,7 +20,7 @@ export default function CalendarList() {
     if (cYM === YM) {
       mDays = dayjs().date();
     } else {
-      mDays = dayjs().daysInMonth();
+      mDays = dayjs().daysInMonth() + 1;// daysInMonth从0计数
     }
     const daystrs = Array(mDays)
       .fill("")
