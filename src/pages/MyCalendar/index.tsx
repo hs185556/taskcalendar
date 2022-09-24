@@ -5,35 +5,22 @@ import { LoopOutline } from "antd-mobile-icons";
 import React from "react";
 import Task from "../Task";
 import styles from "./index.less";
-import { getTasksSync } from "@/services/Task";
-
-let prevYM = dayjs().format("YYYY-M");
+import { getTaskCountInMonthSync } from "@/services/Task";
 
 export default function CalendarList() {
   const [date, setDate] = useState();
   const [delayDays, setDelayDays] = useState([]);
   const ref = React.createRef();
 
-  const queryDelayTask = (YM) => {
-    const cYM = dayjs().format("YYYY-MM");
-    let mDays;
-    if (cYM === YM) {
-      mDays = dayjs().date();
-    } else {
-      mDays = dayjs().daysInMonth() + 1;// daysInMonth从0计数
-    }
-    const daystrs = Array(mDays)
-      .fill("")
-      .map((ignore, i) => {
-        const v = i + 1;
-        return YM + "-" + (v < 10 ? "0" + v : v);
-      });
-    const promises = daystrs.map(async (ds) => {
-      return await getTasksSync(ds, [0, 1, 2]);
+  const queryDelayTask = async (YM, status?) => {
+    const rs = await getTaskCountInMonthSync(YM, status);
+    const mDays = dayjs().daysInMonth() + 1;
+    const mCounts = Array(mDays).fill(0);
+    Array.from(rs.rows).forEach((row) => {
+      const idx = dayjs(row.startTime).date() - 1;
+      mCounts[idx] = row.count;
     });
-    Promise.all(promises).then((rsList) => {
-      setDelayDays(rsList.map((rs) => Array.from(rs.rows).length));
-    });
+    setDelayDays(mCounts);
   };
 
   useEffect(() => {
@@ -45,11 +32,6 @@ export default function CalendarList() {
 
   useEffect(() => {
     if (date) {
-      const YM = dayjs(date).format("YYYY-MM");
-      if (YM !== prevYM) {
-        prevYM = YM;
-        queryDelayTask(YM);
-      }
     }
   }, [date]);
 
@@ -73,19 +55,17 @@ export default function CalendarList() {
         }}
         onPageChange={(year, month) => {
           const YM = year + "-" + (month < 10 ? "0" + month : month);
-          if (YM !== prevYM) {
-            prevYM = YM;
-            queryDelayTask(YM);
-          }
+          queryDelayTask(YM, [0, 1, 2]);
         }}
         renderLabel={(date: Date) => {
           const item = delayDays[date.getDate() - 1];
-          return Number(prevYM.split("-")[1]) === date.getMonth() + 1 && item
-            ? item
-            : "";
+          return item ? item : "";
         }}
       />
-      <Task date={date && dayjs(date).format("YYYY-MM-DD")} />
+      <Task
+        date={date && dayjs(date).format("YYYY-MM-DD")}
+        queryDelayTask={queryDelayTask}
+      />
     </div>
   );
 }

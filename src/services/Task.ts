@@ -19,18 +19,18 @@ export const getTasks = (date, callback) => {
     callback
   );
 };
-export const getTasksSync = async (date, status?) => {
+export const getTasksSync = (date, status?) => {
   const inSql = Array.isArray(status)
-    ? `(${status.map(
-        (v) => `'${v}'`
-      ).join(",")})`
+    ? `(${status.map((v) => `'${v}'`).join(",")})`
     : "";
-  return await websql.exeSync(
+  return websql.exeSync(
     date
       ? `select * from task where startTime <= ? and stopTime >= ? ${
           inSql ? "and status in " + inSql : ""
         } ORDER BY status ASC, created DESC`
-      : `select * from task ORDER BY status ASC, created DESC ${inSql ? "where status in" + inSql : ""}`,
+      : `select * from task ORDER BY status ASC, created DESC ${
+          inSql ? "where status in" + inSql : ""
+        }`,
     date ? [date, date] : []
   );
 };
@@ -67,5 +67,17 @@ export const updateTask = (data) => {
       data.status,
       data.id,
     ].filter((v) => v !== undefined)
+  );
+};
+
+export const getTaskCountInMonthSync = (YM: string, status?) => {
+  const inSql = Array.isArray(status)
+    ? `(${status.map((v) => `'${v}'`).join(",")})`
+    : "";
+  return websql.exeSync(
+    `select startTime, count(*) as count from task where startTime >= ? and startTime <= ?${
+      inSql ? " and status in" + inSql : ""
+    } group by startTime;`,
+    [`${YM}-01`, `${YM}-31`]
   );
 };

@@ -26,14 +26,14 @@ const statusNext = {
 };
 
 export default function Task(props: any) {
-  const { date } = props;
+  const { date, queryDelayTask } = props;
   const [values, setValues] = useState({});
   const [visible1, setVisible1] = useState(false);
   const [tasks, setTasks] = useState([]);
   const [pickerVisible, setPickerVisible] = useState(false);
   const [currentTask, setCurrentTask] = useState({});
 
-  const queryTasks = (date?) =>
+  const queryTasks = (date?) => {
     getTasks(date, (rs) => {
       setTasks(Array.from(rs.rows));
       /* .sort(
@@ -43,6 +43,10 @@ export default function Task(props: any) {
         ) */
       console.log(Array.from(rs.rows));
     });
+    // 查询当月每天待办数
+    const YM = dayjs(date).format("YYYY-MM");
+    queryDelayTask(YM, [0, 1, 2]);
+  };
 
   useEffect(() => {
     if (date) {
