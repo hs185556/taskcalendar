@@ -70,11 +70,15 @@ export default function CalendarList(props) {
             onClick={(e, datePickerRef) => {
               datePickerRef.current?.open();
             }}
-            initialValue={new Date(date)}
+            initialValue={(date && new Date(date)) || undefined}
           >
             <DatePicker>
               {(value) =>
-                value ? dayjs(value).format("YYYY-MM-DD") : "请选择日期"
+                value ? (
+                  dayjs(value).format("YYYY-MM-DD")
+                ) : (
+                  <span style={{ color: "#cccccc" }}>请选择日期</span>
+                )
               }
             </DatePicker>
           </Form.Item>
@@ -85,7 +89,7 @@ export default function CalendarList(props) {
             onClick={(e, datePickerRef) => {
               datePickerRef.current?.open();
             }}
-            initialValue={new Date(date)}
+            initialValue={(date && new Date(date)) || undefined}
             dependencies={["startTime"]}
             rules={[
               {
@@ -102,7 +106,11 @@ export default function CalendarList(props) {
           >
             <DatePicker>
               {(value) =>
-                value ? dayjs(value).format("YYYY-MM-DD") : "请选择日期"
+                value ? (
+                  dayjs(value).format("YYYY-MM-DD")
+                ) : (
+                  <span style={{ color: "#cccccc" }}>请选择日期</span>
+                )
               }
             </DatePicker>
           </Form.Item>

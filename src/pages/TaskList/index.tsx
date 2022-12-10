@@ -3,30 +3,13 @@ import { AddOutline } from "antd-mobile-icons";
 import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 import type { Action } from "antd-mobile/es/components/swipe-action";
-// import dayjs from "dayjs";
+import { statusObj, statusNext } from "@/pages/Task/index";
+import AddTask from "@/pages/Task/components/AddTask";
+import StatuPicker from "@/pages/Task/components/StatuPicker";
 import { addTask, deleteTask, getTasks, updateTask } from "../../services/Task";
-import AddTask from "./components/AddTask";
-import StatuPicker from "./components/StatuPicker";
 import styles from "./index.less";
 
-export const statusObj = {
-  0: { text: "进行中", color: "primary" },
-  1: { text: "新", color: "warning" },
-  2: { text: "延期", color: "danger" },
-  3: { text: "完成", color: "success" },
-  4: { text: "关闭", color: "default" },
-};
-
-export const statusNext = {
-  0: [2, 3, 4],
-  1: [0, 2, 3, 4],
-  2: [0, 3, 4],
-  3: [1],
-  4: [1],
-};
-
 export default function Task(props: any) {
-  const { date, queryDelayTask } = props;
   const [values, setValues] = useState({});
   const [visible1, setVisible1] = useState(false);
   const [tasks, setTasks] = useState([]);
@@ -41,31 +24,26 @@ export default function Task(props: any) {
             new Date(b.startTime).getMilliseconds() -
             new Date(a.startTime).getMilliseconds()
         ) */
-      console.log(Array.from(rs.rows));
-    });
-    // 查询当月每天待办数
-    const YM = dayjs(date).format("YYYY-MM");
-    queryDelayTask(YM, [0, 1, 2]);
+      console.log("------------", Array.from(rs.rows));
+    }, "ORDER BY startTime DESC, status ASC");
   };
 
   useEffect(() => {
-    if (date) {
-      queryTasks(date);
-    }
-  }, [date]);
+    queryTasks();
+  }, []);
 
   const getTitle = (time1: string, time2: string) => {
-    return time1 === time2 ? "" : `${time1} / ${time2}`;
+    return time1 === time2 ? time1 : `${time1} / ${time2}`;
   };
 
   const removeTask = (id) => {
     deleteTask(id);
-    queryTasks(date);
+    queryTasks();
   };
 
   const modifyTask = (data) => {
     updateTask(data);
-    queryTasks(date);
+    queryTasks();
     setPickerVisible(false);
   };
 
@@ -75,7 +53,7 @@ export default function Task(props: any) {
       modifyTask(values);
     } else {
       addTask(values);
-      queryTasks(date);
+      queryTasks();
     }
     setVisible1(false);
   };
@@ -95,7 +73,7 @@ export default function Task(props: any) {
 
   return (
     <div className={styles.container}>
-      <List header="今日待做" className={styles.list}>
+      <List header="任务列表" className={styles.list}>
         <AddOutline
           className={styles.addIcon}
           onClick={() => {
@@ -133,12 +111,12 @@ export default function Task(props: any) {
                   setPickerVisible(true);
                 }}
                 description={v.desc || ""}
-                title={getTitle(v.startTime, v.stopTime)}
                 prefix={
                   <Tag color={statusObj[v.status].color}>
                     {statusObj[v.status].text}
                   </Tag>
                 }
+                extra={getTitle(v.startTime, v.stopTime)}
                 key={v.id}
               >
                 {v.title}
@@ -152,7 +130,7 @@ export default function Task(props: any) {
         visible={visible1}
         setVisible={setVisible1}
         submit={submit}
-        date={date}
+        date={undefined}
       />
       <StatuPicker
         task={currentTask}

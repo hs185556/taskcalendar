@@ -1,16 +1,24 @@
 import { Calendar } from "antd-mobile";
-import { useEffect, useState } from "react";
+import { useEffect, useState, forwardRef, useImperativeHandle } from "react";
 import dayjs from "dayjs";
 import { LoopOutline } from "antd-mobile-icons";
+import { Button } from "antd-mobile";
 import React from "react";
 import Task from "../Task";
 import styles from "./index.less";
 import { getTaskCountInMonthSync } from "@/services/Task";
 
-export default function CalendarList() {
+export default forwardRef((props, ref) => {
   const [date, setDate] = useState();
   const [delayDays, setDelayDays] = useState([]);
-  const ref = React.createRef();
+  const calRef = React.createRef();
+
+  useImperativeHandle(ref, () => ({
+    toToday: () => {
+      calRef.current?.jumpToToday?.();
+      setDate(new Date());
+    },
+  }));
 
   const queryDelayTask = async (YM, status?) => {
     const rs = await getTaskCountInMonthSync(YM, status);
@@ -37,15 +45,8 @@ export default function CalendarList() {
 
   return (
     <div className={styles.container}>
-      <LoopOutline
-        className={styles.positionIcon}
-        onClick={() => {
-          ref.current?.jumpToToday?.();
-          setDate(new Date());
-        }}
-      />
       <Calendar
-        ref={ref}
+        ref={calRef}
         selectionMode="single"
         value={date}
         onChange={(val) => {
@@ -68,4 +69,4 @@ export default function CalendarList() {
       />
     </div>
   );
-}
+});

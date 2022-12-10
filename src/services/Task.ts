@@ -10,11 +10,11 @@ export const createTaskTable = () => {
     "id integer primary key autoincrement,title text,desc text,startTime date,stopTime date,status tinyint,created datetime"
   );
 };
-export const getTasks = (date, callback) => {
+export const getTasks = (date, callback, orderBy = "ORDER BY status ASC, startTime DESC") => {
   websql.exe(
     date
       ? "select * from task where startTime <= ? and stopTime >= ?  ORDER BY status ASC, created DESC;"
-      : "select * from task ORDER BY status ASC, created DESC;",
+      : `select * from task ${orderBy};`,
     date ? [date, date] : [],
     callback
   );
